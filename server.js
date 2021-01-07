@@ -33,9 +33,8 @@ app.get('/mongoGraph', (req, res, next) => {
                 if(err)res.json(err)
             try{
                 
-                let jsonData = JSON.stringify(data)
-                let graphData = {}
-                graphData.data01 = Object.entries(jsonData.reduce((obj, value)=>{
+                // let graphData = {}
+                let data01 = Object.entries(data.reduce((obj, value)=>{
                 if(!obj[value.location]){
                     obj[value.location] = 1
                 }else{
@@ -46,8 +45,7 @@ app.get('/mongoGraph', (req, res, next) => {
                 return { name: value[0], value: value[1]}
                 })
 
-
-                graphData.data02 = Object.entries(jsonData.reduce((obj, value)=>{
+                let data02 = Object.entries(data.reduce((obj, value)=>{
                 if(!obj[value.infected_type]){
                     obj[value.infected_type] = 1
                 }else{
@@ -61,7 +59,7 @@ app.get('/mongoGraph', (req, res, next) => {
 
                 
                 
-                graphData.data03 = Object.entries(jsonData.reduce((obj, value)=>{
+                let data03 = Object.entries(data.reduce((obj, value)=>{
                 if(!obj[value.state]){
                     obj[value.state] = 1
                 }else{
@@ -72,7 +70,8 @@ app.get('/mongoGraph', (req, res, next) => {
                 return { name: value[0], value: value[1]}
                 })
 
-                res.json(graphData)
+                res.json([data01, data02, data03])
+
         }catch(err){
             res.json(err)
         }
