@@ -1,12 +1,14 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
+var cors = require('cors')
 
 const port = process.env.PORT || 8080;
 const index = require("./index");
 
 const app = express();
 app.use(index);
+app.use(cors())
 
 const server = http.createServer(app);
 
@@ -23,6 +25,65 @@ mongoose.connect('mongodb://34.123.45.62:27017/db-covid',{"auth":{"authSource" :
         }
         console.log('Database connected')
 })
+
+app.get('/mongoGraph', (req, res, next) => {
+
+    mongoose.connection.db.collection('patients', function(err, collection){
+        collection.find({}).toArray(function(err, data){
+                if(err)res.json(err)
+            try{
+                
+                let jsonData = JSON.stringify(data)
+                let graphData = {}
+                graphData.data01 = Object.entries(jsonData.reduce((obj, value)=>{
+                if(!obj[value.location]){
+                    obj[value.location] = 1
+                }else{
+                    obj[value.location] += 1
+                }
+                return obj
+                },{})).map((value)=>{
+                return { name: value[0], value: value[1]}
+                })
+
+
+                graphData.data02 = Object.entries(jsonData.reduce((obj, value)=>{
+                if(!obj[value.infected_type]){
+                    obj[value.infected_type] = 1
+                }else{
+                    obj[value.infected_type] += 1
+                }
+                return obj
+                },{})).map((value)=>{
+                return { name: value[0], value: value[1]}
+                })
+
+
+                
+                
+                graphData.data03 = Object.entries(jsonData.reduce((obj, value)=>{
+                if(!obj[value.state]){
+                    obj[value.state] = 1
+                }else{
+                    obj[value.state] += 1
+                }
+                return obj
+                },{})).map((value)=>{
+                return { name: value[0], value: value[1]}
+                })
+
+                res.json(graphData)
+        }catch(err){
+            res.json(err)
+        }
+                })
+        
+                
+    });
+
+ 
+
+});
 
 let interval;
 
